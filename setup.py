@@ -1,13 +1,14 @@
 from setuptools import setup, find_packages
 
 setup(name="ema",
-      version=1.2,
+      version=1.0,
       description="Hardware Control Library",
       author="EMA Team",
       keywords="ema",
       packages=find_packages("src"),
-      packages_dir={"": "src"},
+      package_dir={"": "src"},
       include_package_data=True,
-      install_requires=["pyfirmata"],
+      # These are the version numbers that worked.
+      install_requires=["pyfirmata>=1.1.0", "pyserial>=3.5", "pyyaml>=5.4.1"],
       python_requires=">=3",
       zip_safe=False)

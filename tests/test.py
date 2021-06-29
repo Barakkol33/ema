@@ -1,26 +1,8 @@
-from src.ema.core import Setup, Button, SetupConfiguration
-from stubs import  BoardStub
-from collections.abc import Mapping
+from src.ema.core import SetupConfiguration
+from stubs import BoardStub
+from v8setup import V8Setup
 
-
-CONFIGURATION = SetupConfiguration(port="COM3", button_mapping={"set_button": 3, "ptt_button": 5})
-
-
-class V8Setup(Setup):
-    def power_off(self):
-        self.set_button.press(duration=3)
-
-    def power_on(self):
-        self.set_button.press(duration=1)
-
-    def show_phone_book(self):
-        self.set_button.press()
-
-    def channel_up(self):
-        raise NotImplementedError()
-
-    def channel_down(self):
-        raise NotImplementedError()
+CONFIGURATION = SetupConfiguration.load_from_file("v8.yml")
 
 
 def get_setup(is_stub=False) -> V8Setup:
@@ -54,8 +36,13 @@ def cli():
         v8_stub_setup.__getattribute__(command)()
 
 
+def package_test():
+    import ema
+    ema.Setup
+
+
 def main():
-    code_test()
+    package_test()
 
 
 if __name__ == "__main__":
