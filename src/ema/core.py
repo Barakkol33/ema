@@ -1,9 +1,9 @@
 from __future__ import annotations
+import time
 from collections.abc import Sequence, Mapping
 from pyfirmata import Board, Arduino
-import time
 import serial.tools.list_ports
-import json
+import yaml
 
 
 class Button:
@@ -35,45 +35,41 @@ class Setup:
         self._board = board
         self._buttons = buttons
 
-    @classmethod
-    def connect_arduino_port(self):
+    @staticmethod
+    def choose_available_port():
         connected_ports = list(serial.tools.list_ports.comports())
         if 0 == len(connected_ports):
-            print(F"No connected COM ports found")
+            print(f"No connected COM ports found")
             return
         elif 1 == len(connected_ports):
             port = connected_ports[0]
         else:
             print(F"Available COM ports:")
             for index, port in enumerate(connected_ports):
-                print(F"{index}. {port}")
+                print(f"{index}. {port}")
 
-            choice = int(input(F"\nPlease select COM port: "))
+            choice = int(input(f"\nPlease select COM port: "))
             while choice >= len(connected_ports) or 0 > choice:
-                choice = int(input(F"Invalid choice! \nPlease select COM port: "))
+                choice = int(input(f"Invalid choice! \nPlease select COM port: "))
             port = connected_ports[choice]
 
         print(F'Connecting to "{port}"')
         return port
 
-    def get_json_dict(self):
-        return dict(port=self._board.name, buttons=[button_attributes.__dict__ for button_attributes in self._buttons.values()])
+    @classmethod
+    def construct_from_configuration_file(cls, filename: str):
+        return cls.construct_from_configuration(SetupConfiguration.load_from_file(filename))
 
     @classmethod
-    def save_setup_to_file(cls, setup, setup_file_name: str):
-        with open(setup_file_name, 'w') as new_setup_file:
-            print(cls.get_json_dict(setup))
-            json.dump(cls.get_json_dict(setup), new_setup_file)
+    def construct_from_configuration(cls, configuration: SetupConfiguration):
+        return cls.construct_from_port(port=configuration.port, button_mapping=configuration.button_mapping)
 
     @classmethod
-    def load_setup_from_file(cls, setup_file_name) -> Setup:
-        with open(setup_file_name, 'r') as setup_file:
-            setup_json = json.load(setup_file)
-            return Setup(setup_json['port'], [Button(*button_dict.values()) for button_dict in setup_json['buttons']])
+    def construct_from_port(cls, port: str, button_mapping: Mapping[str, int]) -> Setup:
+        return cls.construct_from_board(board=Arduino(port), button_mapping=button_mapping)
 
     @classmethod
-    def construct_from_button_mapping(cls, port: int, button_mapping: Mapping[str, int]) -> Setup:
-        board = Arduino(f"COM{port}")
+    def construct_from_board(cls, board: Board, button_mapping: Mapping[str, int]) -> Setup:
         buttons = {key: Button(board=board, name=key, button_id=value) for key, value in button_mapping.items()}
         return cls(board=board, buttons=buttons)
 
@@ -83,3 +79,19 @@ class Setup:
             return self._buttons[name]
 
         raise AttributeError
+
+
+class SetupConfiguration:
+    def __init__(self, port: str, button_mapping: Mapping[str, int]):
+        self.port = port
+        self.button_mapping = button_mapping
+
+    def save_to_file(self, filename):
+        with open(filename, "w") as output_file:
+            yaml.dump(dict(port=self.port, button_mapping=self.button_mapping), output_file)
+
+    @classmethod
+    def load_from_file(cls, filename) -> SetupConfiguration:
+        with open(filename, 'r') as input_file:
+            contents = yaml.safe_load(input_file)
+            return cls(port=contents["port"], button_mapping=contents["button_mapping"])

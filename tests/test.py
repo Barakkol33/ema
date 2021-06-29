@@ -1,6 +1,9 @@
-from src.ema.core import Setup, Button
+from src.ema.core import Setup, Button, SetupConfiguration
 from stubs import  BoardStub
 from collections.abc import Mapping
+
+
+CONFIGURATION = SetupConfiguration(port="COM3", button_mapping={"set_button": 3, "ptt_button": 5})
 
 
 class V8Setup(Setup):
@@ -8,7 +11,7 @@ class V8Setup(Setup):
         self.set_button.press(duration=3)
 
     def power_on(self):
-        self.set_button.press()
+        self.set_button.press(duration=1)
 
     def show_phone_book(self):
         self.set_button.press()
@@ -20,35 +23,27 @@ class V8Setup(Setup):
         raise NotImplementedError()
 
 
-def get_setup(button_mapping: Mapping[str, int], is_stub=False) -> Setup:
+def get_setup(is_stub=False) -> V8Setup:
     if is_stub:
-        board = BoardStub("Harta")
-        buttons = {key: Button(board=board, name=key, button_id=value) for key, value in button_mapping.items()}
-        generic_setup = Setup(board, buttons=buttons)
+        v8_setup = V8Setup.construct_from_board(board=BoardStub("Harta"), button_mapping=CONFIGURATION.button_mapping)
     else:
-        generic_setup = Setup.construct_from_button_mapping(port=4, button_mapping=button_mapping)
+        v8_setup = V8Setup.construct_from_configuration(CONFIGURATION)
 
-    return generic_setup
+    return v8_setup
 
 
 def integration_basic_test():
-    v8_button_mapping = {"set_button": 3, "ptt_button": 5}
-    v8_setup = V8Setup.construct_from_button_mapping(port=4, button_mapping=v8_button_mapping)
+    v8_setup = get_setup(is_stub=False)
     v8_setup.toggle_power()
 
 
 def code_test():
-    v8_button_mapping = {"set_button": 3, "answer_button": 5}
-    generic_setup = get_setup(is_stub=True, button_mapping=v8_button_mapping)
-    generic_setup.save_setup_to_file(generic_setup, "setup.json")
-    generic_setup.set_button.press()
+    v8_setup = get_setup(is_stub=True)
+    v8_setup.power_on()
 
 
 def cli():
-    v8_button_mapping = {"set_button": 3, "answer_button": 5}
-    board = BoardStub("Harta")
-    buttons = {key: Button(board=board, name=key, button_id=value) for key, value in v8_button_mapping.items()}
-    v8_stub_setup = V8Setup(board, buttons=buttons)
+    v8_stub_setup = get_setup(is_stub=True)
 
     while True:
         command = input(">>>")
