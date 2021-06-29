@@ -1,4 +1,4 @@
-from EMALib import Setup, Button
+from src.ema.core import Setup, Button
 from stubs import  BoardStub
 from collections.abc import Mapping
 
