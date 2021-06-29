@@ -1,5 +1,6 @@
 from __future__ import annotations
 from collections.abc import Sequence, Mapping
+import json
 
 
 class Button:
@@ -21,6 +22,21 @@ class Setup:
     def __init__(self, port: int, buttons: Sequence[Button]):
         self._port = port
         self._buttons = {button.name: button for button in buttons}
+
+    def get_json_dict(self):
+        return dict(port=self._port, buttons=[button_attributes.__dict__ for button_attributes in self._buttons.values()])
+
+    @classmethod
+    def save_setup_to_file(cls, setup, setup_file_name: str):
+        with open(setup_file_name, 'w') as new_setup_file:
+            print(cls.get_json_dict(setup))
+            json.dump(cls.get_json_dict(setup), new_setup_file)
+
+    @classmethod
+    def load_setup_from_file(cls, setup_file_name):
+        with open(setup_file_name, 'r') as setup_file:
+            setup_json = json.load(setup_file)
+            return Setup(setup_json['port'], [Button(*button_dict.values()) for button_dict in setup_json['buttons']])
 
     @classmethod
     def construct_from_button_mapping(cls, port: int, button_mapping: Mapping[str, int]) -> Setup:
