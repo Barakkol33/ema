@@ -1,5 +1,5 @@
 from EMALib import Setup, Button
-from stubs import  BoardStub
+from stubs import BoardStub
 from collections.abc import Mapping
 
 
