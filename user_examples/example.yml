@@ -1,0 +1,5 @@
+
+port: COM1
+button_mapping:
+    set_button: 3
+    ptt_button: 5
