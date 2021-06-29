@@ -1,3 +1,6 @@
+"""
+Class for the V8 Radio device.
+"""
 from src.ema.core import Setup
 
 

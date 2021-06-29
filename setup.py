@@ -1,5 +1,7 @@
 from setuptools import setup, find_packages
 
+# Configuration for pypi upload
+
 setup(name="ema",
       version=1.0,
       description="Hardware Control Library",

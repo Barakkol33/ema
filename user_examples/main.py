@@ -1,3 +1,6 @@
+"""
+Example for using the ema library as an external simple user.
+"""
 from ema import Setup
 
 

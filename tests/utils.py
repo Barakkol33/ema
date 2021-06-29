@@ -16,6 +16,9 @@ def get_setup(is_stub=False) -> V8Setup:
 
 
 def cli(setup):
+    """
+    Simple CLI that receive function names of the given setup object and invokes them.
+    """
     while True:
         command = input(">>>")
 

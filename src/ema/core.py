@@ -1,3 +1,6 @@
+"""
+Core classes and features for ema library.
+"""
 from __future__ import annotations
 import time
 from collections.abc import Sequence, Mapping
@@ -19,11 +22,17 @@ class Button:
         return self._name
 
     def press(self, duration: float = 0.1):
+        """
+        Press button for a given duration.
+        """
         self.hold()
         time.sleep(duration)
         self.unhold()
 
     def hold(self):
+        """
+        After called, button will stay pressed until unhold() is called.
+        """
         self._board.digital[self._button_id].write(1)
 
     def unhold(self):
@@ -37,12 +46,17 @@ class Setup:
 
     @staticmethod
     def choose_available_port():
+        """
+        CLI utility for automatically choosing a COM port.
+        """
         connected_ports = list(serial.tools.list_ports.comports())
+
         if 0 == len(connected_ports):
-            print(f"No connected COM ports found")
-            return
+            raise RuntimeError(f"No connected COM ports found")
+
         elif 1 == len(connected_ports):
             port = connected_ports[0]
+
         else:
             print(F"Available COM ports:")
             for index, port in enumerate(connected_ports):
@@ -57,11 +71,11 @@ class Setup:
         return port
 
     @classmethod
-    def construct_from_configuration_file(cls, filename: str):
+    def construct_from_configuration_file(cls, filename: str) -> Setup:
         return cls.construct_from_configuration(SetupConfiguration.load_from_file(filename))
 
     @classmethod
-    def construct_from_configuration(cls, configuration: SetupConfiguration):
+    def construct_from_configuration(cls, configuration: SetupConfiguration) -> Setup:
         return cls.construct_from_port(port=configuration.port, button_mapping=configuration.button_mapping)
 
     @classmethod
