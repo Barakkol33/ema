@@ -57,7 +57,7 @@ class Setup:
         return port
 
     def get_json_dict(self):
-        return dict(port=self._port, buttons=[button_attributes.__dict__ for button_attributes in self._buttons.values()])
+        return dict(port=self._board.name, buttons=[button_attributes.__dict__ for button_attributes in self._buttons.values()])
 
     @classmethod
     def save_setup_to_file(cls, setup, setup_file_name: str):
@@ -66,7 +66,7 @@ class Setup:
             json.dump(cls.get_json_dict(setup), new_setup_file)
 
     @classmethod
-    def load_setup_from_file(cls, setup_file_name):
+    def load_setup_from_file(cls, setup_file_name) -> Setup:
         with open(setup_file_name, 'r') as setup_file:
             setup_json = json.load(setup_file)
             return Setup(setup_json['port'], [Button(*button_dict.values()) for button_dict in setup_json['buttons']])
