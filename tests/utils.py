@@ -1,9 +1,9 @@
+import os
 from src.ema.core import SetupConfiguration
 from stubs import BoardStub
 from v8setup import V8Setup
 
-
-CONFIGURATION = SetupConfiguration.load_from_file("v8.yml")
+CONFIGURATION = SetupConfiguration.load_from_file(os.path.join(os.path.dirname(__file__), "v8.yml"))
 
 
 def get_setup(is_stub=False) -> V8Setup:
