@@ -1,5 +1,6 @@
 from __future__ import annotations
 from collections.abc import Sequence, Mapping
+import serial.tools.list_ports
 import json
 
 
@@ -22,6 +23,27 @@ class Setup:
     def __init__(self, port: int, buttons: Sequence[Button]):
         self._port = port
         self._buttons = {button.name: button for button in buttons}
+
+    @classmethod
+    def connect_arduino_port(self):
+        connected_ports = list(serial.tools.list_ports.comports())
+        if 0 == len(connected_ports):
+            print(F"No connected COM ports found")
+            return
+        elif 1 == len(connected_ports):
+            port = connected_ports[0]
+        else:
+            print(F"Available COM ports:")
+            for index, port in enumerate(connected_ports):
+                print(F"{index}. {port}")
+
+            choice = int(input(F"\nPlease select COM port: "))
+            while choice >= len(connected_ports) or 0 > choice:
+                choice = int(input(F"Invalid choice! \nPlease select COM port: "))
+            port = connected_ports[choice]
+
+        print(F'Connecting to "{port}"')
+        return port
 
     def get_json_dict(self):
         return dict(port=self._port, buttons=[button_attributes.__dict__ for button_attributes in self._buttons.values()])
