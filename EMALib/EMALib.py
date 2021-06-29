@@ -12,7 +12,7 @@ class Button:
 
     def press(self):
         #TODO: Aliashiv
-        print(f"Press: {self._port} -> {self._button_id}")
+        print(f"Press: [COM port {self._port}] -> [button id {self._button_id}]")
 
     @classmethod
     def from_button_mapping(cls, port, button_mapping: Mapping[str, int]):
@@ -29,48 +29,17 @@ class Setup:
         buttons = Button.from_button_mapping(port=port, button_mapping=button_mapping)
         return cls(port=port, buttons=buttons)
 
-    def get_button(self, button_name):
+    def get_button(self, button_name) -> Button:
         # TODO: Raise indicative exception?
         return self._buttons[button_name]
 
 
 def main():
-     button_mapping = {"button_mapping": {"power": 1, "volume_up": 2, "volume_down": 3}}
+     button_mapping = {"power": 1, "volume_up": 2, "volume_down": 3}
+
+     my_setup = Setup.from_info(port=4, button_mapping=button_mapping)
+     my_setup.get_button("power").press()
 
 
 if __name__ == "__main__":
     main()
-
-"""
-Usage:
-import EMALib
-
-# Press the power button
-setup = EMALib.Setup.get_setup("First")
-setup.get_button("power").press()
-SETUPS = [{"name": "First", "buttons": {"power": 1, "volume_up": 2, "volume_down": 3}}]
-
-# Protocol
-
-## Request format:
-CMD (byte) | Payload
-
-### Request CMDs:
-1 - Press Button
-
-### Press Button Command format:
-CMD (byte) (=1) | Duration (byte) | Button name length (byte) | Button name
-
-## Response format:
-Code (byte)
-
-### Response Codes:
-101 - OK
-102 - Button name does not exist
-103 - Internal Error 
-
-
-
-
-
-"""
