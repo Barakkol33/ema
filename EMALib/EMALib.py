@@ -1,56 +1,45 @@
+from collections.abc import Sequence, Mapping
 
-
-# Setups
-SETUPS = [{"name": "First", "buttons": {"power": 1, "volume_up": 2, "volume_down": 3}}]
-
-
-class Button(object):
-    def __init__(self, name, button_id):
+class Button:
+    def __init__(self, name: str, button_id: int, port: int):
         self._name = name
+        self._button_id = button_id
+        self._port = port
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self._name
 
     def press(self):
-        button_id = 
-        # TODO: Understand which COM port Arduino is in
-
-
-        # TODO: Communicate with Arduino
-        arduino.send("")
-
-        pass
-
-
-class Setup(object):
-    def __init__(self, name, buttons):
-        self._name = name
-        self._buttons = buttons
+        #TODO: Aliashiv
+        print(f"Press: {self._port} -> {self._button_id}")
 
     @classmethod
-    def from_info(cls, info):
-        # Create button objects
-        # TODO: Check if button name in dictionary
-        button_details = [button_details for button_name in info["buttons"]][0]
-		buttons = [Button(name=button_details[0], button_id=button_details[1])]
+    def from_button_mapping(cls, port, button_mapping: Mapping[str, int]):
+        return [cls(port=port, name=key, button_id=value) for key,value in button_mapping.items()]
 
-        return cls(info["name"], buttons)
 
-    def get_button(self, wanted_button_name):
-        for button in self._buttons:
-            if button.name == wanted_button_name:
-                return button
-
-        raise ValueError(f"Button name {wanted_button_name} does not exist.")
+class Setup:
+    def __init__(self, port: int, buttons: Sequence[Button]):
+        self._port = port
+        self._buttons = {button.name: button for button in buttons}
 
     @classmethod
-    def get_setup(cls, name):
-        for setup_info in SETUPS:
-            if setup_info["name"] == name:
-                return cls.from_info(setup_info)
-        raise ValueError(f"Setup {name} not found")
+    def from_info(cls, port: int, button_mapping: Mapping[str, int]):
+        buttons = Button.from_button_mapping(port=port, button_mapping=button_mapping)
+        return cls(port=port, buttons=buttons)
 
+    def get_button(self, button_name):
+        # TODO: Raise indicative exception?
+        return self._buttons[button_name]
+
+
+def main():
+     button_mapping = {"button_mapping": {"power": 1, "volume_up": 2, "volume_down": 3}}
+
+
+if __name__ == "__main__":
+    main()
 
 """
 Usage:
@@ -59,6 +48,7 @@ import EMALib
 # Press the power button
 setup = EMALib.Setup.get_setup("First")
 setup.get_button("power").press()
+SETUPS = [{"name": "First", "buttons": {"power": 1, "volume_up": 2, "volume_down": 3}}]
 
 # Protocol
 
